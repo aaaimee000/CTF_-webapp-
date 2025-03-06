@@ -100,3 +100,20 @@ This app contains intentional vulnerabilities for educational purposes. Do not u
 2. Paste the content above into it.
 3. Update the "Clone the repository" URL with your actual Git repo (if applicable).
 
+###CTF Walkthrough
+
+1. Perform SQL Injection
+
+- Extract the encryption key from keys_table.
+- Extract the video ID (42) from videos table.
+2. Retrieve the Encrypted Video
+
+- Access /get_video?id=42 and download secret_video.enc.
+3. Decrypt the Video Using OpenSSL
+
+- openssl aes-256-cbc -d -in secret_video.enc -out secret_video.mp4 -k "mysecretkey123"
+
+4. Watch the Decrypted Video
+
+5. Open secret_video.mp4 and find the next hint.
+

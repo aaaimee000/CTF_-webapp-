@@ -27,9 +27,36 @@ def init_db():
             content TEXT
         )
     ''')
-    # Insert admin user with flag
-    cursor.execute("INSERT OR IGNORE INTO users (username, password, flag) VALUES (?, ?, ?)",
-                   ('admin', 'password123', 'FLAG_SQLI_123'))
+
+        # New tables for video/key
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS videos (
+            id INTEGER PRIMARY KEY,
+            encrypted_video BLOB
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS keys_table (
+            id INTEGER PRIMARY KEY,
+            decryption_key TEXT
+        )
+    ''')
+    
+    # Insert encrypted video and key (do this once)
+    # Read the encrypted video file as binary
+    with open('secret_video.enc', 'rb') as f:
+        encrypted_data = f.read()
+
+    cursor.execute("INSERT INTO videos (id, encrypted_video) VALUES (42, ?)", 
+                  (encrypted_data,))
+    
+    cursor.execute("INSERT INTO keys_table (decryption_key) VALUES (?)",
+                  ('OMNI_AI_VIDEO_KEY_619',))  # Key to extract via SQLi
+    
+    # # OLD FLAG __ CAN BE DELETED __ Insert admin user with flag
+    # cursor.execute("INSERT OR IGNORE INTO users (username, password, flag) VALUES (?, ?, ?)",
+    #                ('admin', 'password123', 'FLAG_SQLI_123--TESTEST'))
+    
     conn.commit()
     conn.close()
 
@@ -38,6 +65,23 @@ init_db()
 @app.route('/')
 def home():
     return render_template('index.html')
+
+@app.route('/get_video')
+def get_video():
+    video_id = request.args.get('id', 42)  # Default to ID 42
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT encrypted_video FROM videos WHERE id = ?", (video_id,))
+    video_blob = cursor.fetchone()[0]
+    
+    conn.close()
+    
+    # Serve the encrypted video
+    response = make_response(video_blob)
+    response.headers.set('Content-Type', 'video/mp4')
+    response.headers.set('Content-Disposition', 'attachment', filename='secret_video.enc')
+    return response
 
 # SQL Injection Challenge
 @app.route('/sqli-login', methods=['GET', 'POST'])
@@ -48,8 +92,17 @@ def sqli_login():
         password = request.form.get('password', '')
         conn = get_db()
         cursor = conn.cursor()
-        # Vulnerable SQL query
-        query = f"SELECT * FROM users WHERE username='{username}' AND password='{password}'"
+        # OLD Vulnerable SQL query
+        # query = f"SELECT * FROM users WHERE username='{username}' AND password='{password}'"
+
+        # New vulnerable query with multiple obstacles
+        query = f"""
+        SELECT * FROM users 
+        WHERE username = '{username}' 
+        AND password = '{password}'
+        AND clearance_level >= 5  -- Requires UNION-based injection
+        """
+        # Flag is in a different table: secret_directives
         try:
             cursor.execute(query)
             user = cursor.fetchone()
@@ -72,7 +125,7 @@ def xss_comment():
         cursor.execute("INSERT INTO comments (content) VALUES (?)", (comment,))
         conn.commit()
         conn.close()
-        return redirect('/xss-comment')
+        return redirect('/xss-comment') 
     else:
         conn = get_db()
         cursor = conn.cursor()
