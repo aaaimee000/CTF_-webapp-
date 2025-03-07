@@ -105,27 +105,27 @@ This app contains intentional vulnerabilities for educational purposes. Do not u
 1. Perform SQL Injection
 
 - Extract the encryption key from keys_table.
-- Extract the video ID (42) from videos table.
+- Extract the video ID (1) from videos table.
 2. Retrieve the Encrypted Video
 
-- Access /get_video?id=42 and download secret_video.enc.
+- Access /get_video?id=1 and download secret_video.enc.
 3. Decrypt the Video Using OpenSSL
 
-- openssl aes-256-cbc -d -in secret_video.enc -out secret_video.mp4 -k "mysecretkey123"
+- openssl aes-256-cbc -d -in secret_video.enc -out secret_video.mp4 -k "OMNI_AI_VIDEO_KEY_619"
 
 4. Watch the Decrypted Video
 
 5. Open secret_video.mp4 and find the next hint.
 
 
-# WHAT DO WE NEED TO GIVE THEM HINT 
-1. tell them in the previous flag or on the website, admin, password123, that there are four tables in the web app, users, keys_table, videos, comments. 
-2. tell tehm what encryption it is -- 
+# WHAT DO WE NEED TO GIVE THEM HINT -- can be included in the brief
+1. tell them in the previous flag or on the website, username is admin, password is password123, and there are four tables in the web app, their names are users, keys_table, videos, and comments. 
+2. tell them what encryption it is -- aes-256-cbc
 
 
 
-SQL injection 
-### BEST TO INJECT TO GET A LIST OF TABLES FIRST -- be in the hint document 
+# SQL injection 
+### BEST TO INJECT TO GET A LIST OF TABLES FIRST -- this does not work anymore because i hardcode it to return from users[0] so it works to return the decryption key, but if you need below to work, users[3] with the following sql injection command would work. 
 
 1. ' UNION SELECT NULL, NULL, NULL, group_concat(name, char(124)) FROM sqlite_master WHERE type='table' --
 2. return "Flag: users|comments|videos|keys_table | Access /get_video?id=1"
@@ -177,8 +177,7 @@ TODO Update:
 ### experimentwith video encrypt, then serve it on webapp
 #### next flag--   XSS
 #### need to see what exactly is the decryption key
-
-
+#### frontend of sql 
 
 
 
