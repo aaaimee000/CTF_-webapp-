@@ -16,7 +16,7 @@ def init_db():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY,
-            username TEXT,
+            username TEXT UNIQUE,
             password TEXT,
             flag TEXT
         )
@@ -27,8 +27,8 @@ def init_db():
             content TEXT
         )
     ''')
-
-        # New tables for video/key
+    
+    # New tables for video/key with UNIQUE constraints to avoid duplicates
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS videos (
             id INTEGER PRIMARY KEY,
@@ -38,7 +38,7 @@ def init_db():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS keys_table (
             id INTEGER PRIMARY KEY,
-            decryption_key TEXT
+            decryption_key TEXT UNIQUE
         )
     ''')
     
@@ -47,11 +47,13 @@ def init_db():
     with open('secret_video.enc', 'rb') as f:
         encrypted_data = f.read()
 
+    # Use a fixed id for videos to avoid duplicate entries
     cursor.execute("INSERT OR IGNORE INTO videos (id, encrypted_video) VALUES (1, ?)", 
-                  (encrypted_data,))
+                   (encrypted_data,))
     
+    # The UNIQUE constraint on decryption_key will ensure no duplicate keys are inserted
     cursor.execute("INSERT OR IGNORE INTO keys_table (decryption_key) VALUES (?)",
-                  ('OMNI_AI_VIDEO_KEY_619',))  # Key to extract via SQLi
+                   ('OMNI_AI_VIDEO_KEY_619',))  # Key to extract via SQLi
     
     # OLD FLAG __ CAN BE DELETED __ Insert admin user with flag
     cursor.execute("INSERT OR IGNORE INTO users (username, password, flag) VALUES (?, ?, ?)",
@@ -68,7 +70,7 @@ def home():
 
 @app.route('/get_video')
 def get_video():
-    video_id = request.args.get('id', 1)  # Default to ID 42
+    video_id = request.args.get('id', 1)  # Default to ID 1
     conn = get_db()
     cursor = conn.cursor()
     
@@ -93,19 +95,20 @@ def sqli_login():
         conn = get_db()
         cursor = conn.cursor()
         
-        # Vulnerable query 
+        # Vulnerable query without the JOIN permissions
         query = f"""
         SELECT * FROM users 
         WHERE username = '{username}' 
         AND password = '{password}'
         """
-
+        
         try:
             cursor.execute(query)
             user = cursor.fetchone()
             if user:
-                # Show decryption hint only if they extract the key
-                message = f"Flag: {user[0]} | Access /get_video?id=42"
+                # Using user[0] to display the flag means our SQL injection payload must
+                # return the decryption key as the first column.
+                message = f"Flag: {user[0]} | Access /get_video?id=1"
             else:
                 message = "ACCESS DENIED: Insufficient clearance."
         except sqlite3.Error as e:
