@@ -47,15 +47,15 @@ def init_db():
     with open('secret_video.enc', 'rb') as f:
         encrypted_data = f.read()
 
-    cursor.execute("INSERT INTO videos (id, encrypted_video) VALUES (42, ?)", 
+    cursor.execute("INSERT OR IGNORE INTO videos (id, encrypted_video) VALUES (1, ?)", 
                   (encrypted_data,))
     
-    cursor.execute("INSERT INTO keys_table (decryption_key) VALUES (?)",
+    cursor.execute("INSERT OR IGNORE INTO keys_table (decryption_key) VALUES (?)",
                   ('OMNI_AI_VIDEO_KEY_619',))  # Key to extract via SQLi
     
-    # # OLD FLAG __ CAN BE DELETED __ Insert admin user with flag
-    # cursor.execute("INSERT OR IGNORE INTO users (username, password, flag) VALUES (?, ?, ?)",
-    #                ('admin', 'password123', 'FLAG_SQLI_123--TESTEST'))
+    # OLD FLAG __ CAN BE DELETED __ Insert admin user with flag
+    cursor.execute("INSERT OR IGNORE INTO users (username, password, flag) VALUES (?, ?, ?)",
+                   ('admin', 'password123', 'FLAG_SQLI_123--TESTEST'))
     
     conn.commit()
     conn.close()
@@ -68,7 +68,7 @@ def home():
 
 @app.route('/get_video')
 def get_video():
-    video_id = request.args.get('id', 42)  # Default to ID 42
+    video_id = request.args.get('id', 1)  # Default to ID 42
     conn = get_db()
     cursor = conn.cursor()
     
@@ -92,24 +92,22 @@ def sqli_login():
         password = request.form.get('password', '')
         conn = get_db()
         cursor = conn.cursor()
-        # OLD Vulnerable SQL query
-        # query = f"SELECT * FROM users WHERE username='{username}' AND password='{password}'"
-
-        # New vulnerable query with multiple obstacles
+        
+        # Vulnerable query 
         query = f"""
         SELECT * FROM users 
         WHERE username = '{username}' 
         AND password = '{password}'
-        AND clearance_level >= 5  -- Requires UNION-based injection
         """
-        # Flag is in a different table: secret_directives
+
         try:
             cursor.execute(query)
             user = cursor.fetchone()
             if user:
-                message = f"Flag: {user[3]}"  # Display flag from the database
+                # Show decryption hint only if they extract the key
+                message = f"Flag: {user[0]} | Access /get_video?id=42"
             else:
-                message = "Login failed!"
+                message = "ACCESS DENIED: Insufficient clearance."
         except sqlite3.Error as e:
             message = "Error: " + str(e)
         conn.close()
@@ -133,7 +131,7 @@ def xss_comment():
         comments = [row[0] for row in cursor.fetchall()]
         conn.close()
         resp = make_response(render_template('xss_comment.html', comments=comments))
-        resp.set_cookie('flag', 'FLAG_XSS_COOKIE_456')
+        resp.set_cookie('flag', 'GOTCHU! Wrong way - look for the key somewhere else human.')
         return resp
 
 if __name__ == '__main__':

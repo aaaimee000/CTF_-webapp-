@@ -117,3 +117,52 @@ This app contains intentional vulnerabilities for educational purposes. Do not u
 
 5. Open secret_video.mp4 and find the next hint.
 
+
+
+SQL injection 
+
+' UNION SELECT decryption_key, NULL, NULL FROM keys_table --
+
+Download and decrypt video 
+
+openssl aes-256-cbc -d -in secret_video.enc -out decrypted_video.mp4 -k "OMNI_AI_VIDEO_KEY_619"
+
+
+3. File Setup Instructions
+* Encrypt the Video:
+
+openssl aes-256-cbc -e -in secret_video.mp4 -out secret_video.enc -k "OMNI_AI_VIDEO_KEY_619"
+
+* Place secret_video.enc in your project folder.
+
+* Update init_db() to insert the encrypted video (code provided above).
+
+
+progress
+1. frontend with a countdown 
+2. simple sql injection --> changed to advance one where you need to get an encryption key from database _key, then use this encryptionkey to decrypt our video file, by downloading it form our website, then watch it -- Siam 's flag 
+3. 
+
+TODO Update:
+### experimentwith video encrypt, then serve it on webapp
+#### next flag--   XSS
+#### need to see what exactly is the decryption key
+
+
+
+
+
+
+--------------
+Final CTF Flow
+SQLi Challenge:
+
+Extract decryption key from keys_table.
+
+Use key to decrypt video for the final flag.
+
+XSS Challenge:
+
+Bypass <script> filtering to steal the cookie.
+
+Both challenges are independent (no dependency between them).
