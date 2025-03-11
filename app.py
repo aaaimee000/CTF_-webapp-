@@ -134,7 +134,7 @@ def xss_comment():
         comments = [row[0] for row in cursor.fetchall()]
         conn.close()
         resp = make_response(render_template('xss_comment.html', comments=comments))
-        resp.set_cookie('flag', 'GOTCHU! Wrong way - look for the key somewhere else human.')
+        resp.set_cookie('flag', 'GOTCHU! Wrong way - look for the key somewhere else. Hint: something is in the database.')
         return resp
 
 # if __name__ == '__main__':
