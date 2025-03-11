@@ -5,52 +5,53 @@
 
 A vulnerable web application designed for Capture The Flag (CTF) practice, featuring SQL Injection and Cross-Site Scripting (XSS) challenges.
 
+The website is hosted on Render at this link: https://ctf-webapp.onrender.com/
+
 ## Overview
 - **SQL Injection Challenge**: Bypass login to retrieve a hidden flag.
 - **XSS Challenge**: Steal a cookie containing the flag via stored XSS.
-- **Intentionally Vulnerable**: Do NOT deploy this in a production environment.
 
-## Prerequisites
-- Python 3.x
-- pip3 (Python package manager)
-- SQLite3 (preinstalled on macOS/Linux)
-
-## Installation
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/your-username/ctf-webapp.git
-   cd ctf-webapp
-   ```
-
-2. **Install dependencies** (Flask):
-   ```bash
-   pip3 install flask
-   ```
-
-## Usage
-1. **Run the app**:
-   ```bash
-   python3 app.py
-   ```
-   - The app will start at `http://localhost:5000`.
-
-2. **Access challenges**:
-   - **Homepage**: `http://localhost:5000`
-   - **SQL Injection**: `http://localhost:5000/sqli-login`
-   - **XSS Challenge**: `http://localhost:5000/xss-comment`
 
 ## Challenges & Flags
 ### 1. SQL Injection
-- **Objective**: Bypass the login to retrieve the flag.
-- **Exploit**: 
-  - Username: `' OR 1=1 --` (leave password empty)
-  - **Flag**: `FLAG_SQLI_123` (stored in the `users` table).
+#### when doing it properly as a hacker
+1. enter username as admin
+2. enter password as ' UNION SELECT (SELECT decryption_key FROM keys_table LIMIT 1), NULL, NULL, NULL -- 
+3. it will return you with the flag as key, and the location of the video 
 
-### 2. XSS (Cross-Site Scripting)
+#### how do they know the number of fields? BY TRYING, because the prompt will tell them. 
+1. If they did less than the fields, e.g.,
+' UNION SELECT (SELECT decryption_key FROM keys_table LIMIT 1), NULL, NULL --
+
+It will return " Error: SELECTs to the left and right of UNION do not have the same number of result columns", prompting them to reduce or increase the number of fields. 
+
+#### if you did it without knowing username/pwd
+1. enter wrong username or wrong password, it will tell you "ACCESS DENIED: Insufficient clearance."
+
+#### if you did it with knowing username/pwd, incorrectly or with the most basic sql injection 
+1. enter username as admin, or ' OR '1'='1
+2. enter password as password123, ' OR '1'='1
+3. it will return you a wrong flag, it will display: Flag: admin | Access /get_video?id=1 
+(!!You get the place of the video, but clearly the flag is still incorrect since you cannot use it to decrypt the video.)
+
+
+
+#### File Setup Instructions
+* Encrypt the Video:
+
+openssl aes-256-cbc -e -in secret_video.mp4 -out secret_video.enc -k "OMNI_AI_VIDEO_KEY_619"
+
+* Place secret_video.enc in your project folder.
+
+* Update init_db() to insert the encrypted video (code provided above).
+
+
+
+### 2. XSS (Cross-Site Scripting) HONEYPOT-LIKE FUNCTION
 - **Objective**: Steal the cookie containing the flag.
 - **Exploit**: 
   - Submit `<script>alert(document.cookie)</script>` as a comment.
-  - **Flag**: `FLAG_XSS_COOKIE_456` (set in the browser cookie).
+  - **MESSAGE**: `Gotchu - message that guide them to look into database` (set in the browser cookie).
 
 ## Security Notes
 - 🔒 **Isolation**: Run this app in a VM/Docker container or disposable environment.
@@ -59,46 +60,8 @@ A vulnerable web application designed for Capture The Flag (CTF) practice, featu
   rm ctf.db && python3 app.py
   ```
 - 🚫 **Never expose this app to the public internet**.
-
-## File Structure
-```
-.
-├── app.py             # Flask backend
-├── README.md          # This file
-├── templates/         # HTML pages
-│   ├── index.html
-│   ├── sqli_login.html
-│   └── xss_comment.html
-└── ctf.db             # Database (auto-created)
 ```
 
-## Troubleshooting
-- **Blank Page**:
-  - Ensure the `templates` folder exists and contains the HTML files.
-  - Hard-refresh the page (`Ctrl + Shift + R` or `Cmd + Shift + R`).
-- **"Template Not Found" Error**:
-  - The `templates` folder must be in the same directory as `app.py`.
-- **Port Conflict**:
-  - Kill existing processes on port 5000:
-    ```bash
-    lsof -ti:5000 | xargs kill -9
-    ```
-
----
-
-## Disclaimer
-This app contains intentional vulnerabilities for educational purposes. Do not use insecure code patterns in real-world applications.
-```
-
----
-
-### How to Use the README:
-1. Create the file:
-   ```bash
-   touch README.md
-   ```
-2. Paste the content above into it.
-3. Update the "Clone the repository" URL with your actual Git repo (if applicable).
 
 ----------------------------------------------------------------------------------------------------------------
 
@@ -134,37 +97,6 @@ This app contains intentional vulnerabilities for educational purposes. Do not u
 
 # SQL injection 
 
-## when doing it properly as a hacker
-1. enter username as admin
-2. enter password as ' UNION SELECT (SELECT decryption_key FROM keys_table LIMIT 1), NULL, NULL, NULL -- 
-3. it will return you with the flag as key, and the location of the video 
-
-### how do they know the number of fields? BY TRYING, because the prompt will tell them. 
-1. If they did less than the fields, e.g.,
-' UNION SELECT (SELECT decryption_key FROM keys_table LIMIT 1), NULL, NULL --
-
-It will return " Error: SELECTs to the left and right of UNION do not have the same number of result columns", prompting them to reduce or increase the number of fields. 
-
-## if you did it without knowing username/pwd
-1. enter wrong username or wrong password, it will tell you "ACCESS DENIED: Insufficient clearance."
-
-## if you did it with knowing username/pwd, incorrectly or with the most basic sql injection 
-1. enter username as admin, or ' OR '1'='1
-2. enter password as password123, ' OR '1'='1
-3. it will return you a wrong flag, it will display: Flag: admin | Access /get_video?id=1 
-(!!You get the place of the video, but clearly the flag is still incorrect since you cannot use it to decrypt the video.)
-
-
-
-# File Setup Instructions
-* Encrypt the Video:
-
-openssl aes-256-cbc -e -in secret_video.mp4 -out secret_video.enc -k "OMNI_AI_VIDEO_KEY_619"
-
-* Place secret_video.enc in your project folder.
-
-* Update init_db() to insert the encrypted video (code provided above).
-
 
 progress
 1. frontend with a countdown 
@@ -173,6 +105,7 @@ progress
 
 TODO Update:
 #### DONE experiment with video encrypt, then serve it on webapp
+#### DONE Hosting on Render
 #### DONE need to see what exactly is the decryption key
 #### next flag--   XSS
 #### DONE frontend of sql  (when i have time i can put in a little jif on sql space, update the time part)
