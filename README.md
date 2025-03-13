@@ -50,8 +50,8 @@ openssl aes-256-cbc -e -in secret_video.mp4 -out secret_video.enc -k "OMNI_AI_VI
 ### 2. XSS (Cross-Site Scripting) HONEYPOT-LIKE FUNCTION
 - **Objective**: Steal the cookie containing the flag.
 - **Exploit**: 
-  - Submit `<script>alert(document.cookie)</script>` as a comment.
-  - **MESSAGE**: `Gotchu - message that guide them to look into database` (set in the browser cookie).
+  - Submit `<svg/onload="alert(document.cookie)">` as a comment.
+  - **MESSAGE**: `Gotchu - message that guide them to look into database` 
 
 ## Security Notes
 - 🔒 **Isolation**: Run this app in a VM/Docker container or disposable environment.

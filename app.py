@@ -1,7 +1,8 @@
-from flask import Flask, request, render_template, redirect, make_response
+from flask import Flask, request, render_template, redirect, make_response,session
 import sqlite3
 import os
 app = Flask(__name__)
+app.secret_key = os.urandom(24)  # Add this line after app creation
 
 # Database configuration
 DATABASE = 'ctf.db'
@@ -21,12 +22,12 @@ def init_db():
             flag TEXT
         )
     ''')
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS comments (
-            id INTEGER PRIMARY KEY,
-            content TEXT
-        )
-    ''')
+    # cursor.execute('''
+    #     CREATE TABLE IF NOT EXISTS comments (
+    #         id INTEGER PRIMARY KEY,
+    #         content TEXT
+    #     )
+    # ''')
     
     # New tables for video/key with UNIQUE constraints to avoid duplicates
     cursor.execute('''
@@ -123,23 +124,44 @@ def sqli_login():
 # XSS Challenge
 @app.route('/xss-comment', methods=['GET', 'POST'])
 def xss_comment():
+    # Use session storage instead of database
+    if 'comments' not in session:
+        session['comments'] = []
+        
     if request.method == 'POST':
         comment = request.form.get('comment', '')
-        conn = get_db()
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO comments (content) VALUES (?)", (comment,))
-        conn.commit()
-        conn.close()
-        return redirect('/xss-comment') 
-    else:
-        conn = get_db()
-        cursor = conn.cursor()
-        cursor.execute("SELECT content FROM comments")
-        comments = [row[0] for row in cursor.fetchall()]
-        conn.close()
-        resp = make_response(render_template('xss_comment.html', comments=comments))
-        resp.set_cookie('flag', 'GOTCHU! Wrong way - look for the key somewhere else. Hint: something is in the database.')
-        return resp
+        # Temporarily store comment only for next display
+        session['temp_comment'] = comment
+        return redirect('/xss-comment')
+    
+    # Show temporary comment once then clear it
+    temp_comment = session.pop('temp_comment', None)
+    comments = session['comments']
+    if temp_comment:
+        comments = [temp_comment]  # Only show last submitted comment
+    
+    resp = make_response(render_template('xss_comment.html', comments=comments))
+    resp.set_cookie(':)', 'GOTCHU! Wrong way - look for the key somewhere else. Hint: something is in the database.')
+    return resp
+
+# def xss_comment():
+#     if request.method == 'POST':
+#         comment = request.form.get('comment', '')
+#         conn = get_db()
+#         cursor = conn.cursor()
+#         cursor.execute("INSERT INTO comments (content) VALUES (?)", (comment,))
+#         conn.commit()
+#         conn.close()
+#         return redirect('/xss-comment') 
+#     else:
+#         conn = get_db()
+#         cursor = conn.cursor()
+#         cursor.execute("SELECT content FROM comments")
+#         comments = [row[0] for row in cursor.fetchall()]
+#         conn.close()
+#         resp = make_response(render_template('xss_comment.html', comments=comments))
+#         resp.set_cookie(':)', 'GOTCHU! Wrong way - look for the key somewhere else. Hint: something is in the database.')
+#         return resp
 
 if __name__ == '__main__':
     app.run(debug=True)

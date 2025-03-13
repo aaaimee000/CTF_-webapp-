@@ -13,10 +13,10 @@
     <h2>Comments:</h2>
     {% for comment in comments %}
         <div>{{ comment | safe }}</div>  <!-- Vulnerable: 'safe' disables escaping -->
-    {% endfor %}
+    <!-- {% endfor %}
 </body>
 </html>
- -->
+ --> -->
 
 <!DOCTYPE html>
 <html>
@@ -36,7 +36,7 @@
 
     <h2>Recent Activity:</h2>
     {% for comment in comments %}
-        {# Basic filter to block <script> tags (but allows other XSS vectors) #}
+        <!-- {# Basic filter to block <script> tags (but allows other XSS vectors) #} -->
         {% set filtered_comment = comment | replace('<script>', '') | replace('</script>', '') %}
         <div class="comment">{{ filtered_comment | safe }}</div>
     {% endfor %}
