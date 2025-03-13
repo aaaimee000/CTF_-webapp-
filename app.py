@@ -163,7 +163,7 @@ def xss_comment():
 #         resp.set_cookie(':)', 'GOTCHU! Wrong way - look for the key somewhere else. Hint: something is in the database.')
 #         return resp
 
-if __name__ == '__main__':
-    app.run(debug=True)
 # if __name__ == '__main__':
-#     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
+#     app.run(debug=True)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
