@@ -109,10 +109,8 @@ TODO Update:
 #### DONE need to see what exactly is the decryption key
 #### next flag--   XSS
 #### DONE frontend of sql  (when i have time i can put in a little jif on sql space, update the time part)
-
-
-
-
+#### DONE put the hash below the SQL return line.
+#### DONE make the time longer 
 
 
 

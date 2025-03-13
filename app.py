@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template, redirect, make_response
 import sqlite3
-
+import os
 app = Flask(__name__)
 
 # Database configuration
@@ -108,7 +108,11 @@ def sqli_login():
             if user:
                 # Using user[0] to display the flag means our SQL injection payload must
                 # return the decryption key as the first column.
-                message = f"Flag: {user[0]} | Access /get_video?id=1"
+                base_message = f"Key: {user[0]} | Access /get_video?id=1"
+                if user[0] == 'OMNI_AI_VIDEO_KEY_619':
+                    message = f"{base_message}\n    Flag: hUZ/F+uOO4jsf22mzywcZfHmPdCqtz6H+ArecP9gXlXC7bC7aaLfayX3d5Lg/r4T"
+                else:
+                    message = base_message
             else:
                 message = "ACCESS DENIED: Insufficient clearance."
         except sqlite3.Error as e:
@@ -137,7 +141,7 @@ def xss_comment():
         resp.set_cookie('flag', 'GOTCHU! Wrong way - look for the key somewhere else. Hint: something is in the database.')
         return resp
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
+    app.run(debug=True)
+# if __name__ == '__main__':
+#     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)

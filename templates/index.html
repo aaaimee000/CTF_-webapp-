@@ -62,14 +62,17 @@
     </div>
 
     <script>
-        // 60-minute countdown timer
-        let timeLeft = 60 * 60;
+        // 3-hour countdown timer
+        let timeLeft = 3 * 60 * 60; // 10800 seconds (3 hours)
         const timer = document.getElementById('countdown');
-
+    
         function updateTimer() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timer.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            const hours = Math.floor(timeLeft / 3600);
+            const remainingSeconds = timeLeft % 3600;
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+    
+            timer.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
             
             if (timeLeft <= 0) {
                 timer.textContent = "SYSTEM DOMINATION COMPLETE";
