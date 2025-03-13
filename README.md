@@ -1,6 +1,5 @@
 # CTF_-webapp-
 
-
 # CTF Web App (SQLi & XSS Challenges)
 
 A vulnerable web application designed for Capture The Flag (CTF) practice, featuring SQL Injection and Cross-Site Scripting (XSS) challenges.
@@ -8,8 +7,8 @@ A vulnerable web application designed for Capture The Flag (CTF) practice, featu
 The website is hosted on Render at this link: https://ctf-webapp.onrender.com/
 
 ## Overview
-- **SQL Injection Challenge**: Bypass login to retrieve a hidden flag.
-- **XSS Challenge**: Steal a cookie containing the flag via stored XSS.
+- **SQL Injection Challenge**: Bypass login to retrieve a hidden flag. Both key, hash and video will be returned if SQL injection is done correctly.
+- **XSS Challenge**: XSS is only a confusion to the participants.
 
 
 ## Challenges & Flags
@@ -17,7 +16,7 @@ The website is hosted on Render at this link: https://ctf-webapp.onrender.com/
 #### when doing it properly as a hacker
 1. enter username as admin
 2. enter password as ' UNION SELECT (SELECT decryption_key FROM keys_table LIMIT 1), NULL, NULL, NULL -- 
-3. it will return you with the flag as key, and the location of the video 
+3. it will return you with the decrypytion Key, the location of the video, and the flag.
 
 #### how do they know the number of fields? BY TRYING, because the prompt will tell them. 
 1. If they did less than the fields, e.g.,
@@ -86,22 +85,20 @@ openssl aes-256-cbc -e -in secret_video.mp4 -out secret_video.enc -k "OMNI_AI_VI
 
 
 # WHAT DO WE NEED TO GIVE THEM HINT -- can be included in the brief
-1. tell them in the previous flag or on the website, username is admin, password is password123, and there are four tables in the web app, their names are users, keys_table, videos, and comments. 
-2. tell them what encryption it is -- aes-256-cbc
+1. tell them some basic information to get them started: username is admin, password is password123, and there are four tables in the web app, their names are users, keys_table, videos, and comments. The users table structure is 
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    username TEXT UNIQUE,
+    password TEXT,
+    flag TEXT
+)
+2. In hints, we can tell them what encryption the video is encrypted in  -- aes-256-cbc
 
 # Things for ourselves in submission
 1. See the CTF Walkthrough above. Both key and hash are included. 
-2. XSS is only a bonus/ confusion to the whole CTF.
+2. XSS is only a confusion to the participants.
 
 
-
-# SQL injection 
-
-
-progress
-1. frontend with a countdown 
-2. simple sql injection --> changed to advance one where you need to get an encryption key from database _key, then use this encryptionkey to decrypt our video file, by downloading it form our website, then watch it -- Siam 's flag 
-3. 
 
 TODO Update:
 #### DONE experiment with video encrypt, then serve it on webapp
@@ -124,6 +121,6 @@ Use key to decrypt video for the final flag.
 
 XSS Challenge:
 
-Bypass <script> filtering to steal the cookie.
+Bypass <script> filtering to steal the cookie. For example, submit <svg/onload="alert(document.cookie)">
 
 Both challenges are independent (no dependency between them).
